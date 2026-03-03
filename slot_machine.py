@@ -4,6 +4,8 @@ print("SLOT MACHINE SIMULATOR")
 # Import random
 import random
 
+print("Hi Lucy")
+
 # Print pay table
 print("""
 Pay table:
