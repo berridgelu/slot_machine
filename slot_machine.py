@@ -1,25 +1,51 @@
+##
+# slot_machine.py
+# Slot machine simulator
+
 import random
 
-# Slot Machine Simulation
-print("SLOT MACHINE SIMULATOR")
+# Constant variables are set
+PAYLINE_COST = 20
+ROWS = 3
+COLUMNS = 5
+SYMBOLS = ["❤", "❤", "⭐", "⭐", "🍒", "🍒", "🍎", "🍎", "$", "↑"]
 
-# Prompt user to play or recieve further game information until they give a valid response
-while True:
-    # Give user options for the pay table, paylines and to play
-    try:
-        instructions = int(input(f"""
+def force_int(min_int, max_int):
+    """
+    Forces the user to enter an integer
+    """
+    
+    while True:
+        try:
+            variable = int(input("> ")) 
+        except ValueError:
+            print("Please enter a valid number")
+            continue
+
+        if variable < min_int or variable > max_int:
+            print(f"Please enter an option between {min_int} - {max_int}")
+        else:
+            break
+
+    return variable
+
+def menu():
+    """
+    Prints options given at the start of the program
+    """
+
+    print("""
 Press 1 for the pay table
 Press 2 for paylines
 Press 3 to spin
-> """))
+""")
 
-    except ValueError:
-        print("Please enter a valid response")
-        continue
-        
-    if instructions == 1:
-        # Print pay table
-        print("""
+def pay_table():
+    """
+    Prints pay table
+    """
+    
+    print("""
 Pay table:
 5 of a kind - 10,000 credits
 4 of a kind - 1,000 credits
@@ -27,9 +53,12 @@ Pay table:
 '$' or '↑' win triple credit!
 """)
 
-    elif instructions == 2:
-        # Print paylines
-        print("""Paylines:
+def pay_lines():
+    """
+    Prints paylines
+    """
+
+    print("""Paylines:
 
 * * * * * - 1
 * * * * * - 2
@@ -46,84 +75,94 @@ Pay table:
 Paylines are counted from left to right
 '↑' is a wild card
 Each payline costs 20 credits
-The winning payline is the one that earns the most money""") 
+The winning payline is the one that earns the most money
+""") 
 
-    elif instructions == 3:
-        break
+def create_slot_machine(rows, columns):
+    """
+    Creates the slot_machine display
+    """
 
-    else:
-        print("Please enter a valid number")
+    slot_machine = []
 
-# Create symbol list where 
-symbols = ["❤", "❤", "⭐", "⭐", "🍒", "🍒", "🍎", "🍎", "$", "↑"]
+    for i in range(rows):
+        slot_machine.append([])
+        for j in range(columns):
+            slot_machine[i].append(random.choice(SYMBOLS))
+
+    return slot_machine
+
+def display_slot_machine(slot_machine):
+    """
+    Displays the slot machine
+    """
+
+    print("""spinning...
+""")
+    
+    for row in slot_machine:
+        print("\t".join(row))
+
+def create_paylines(slot_machine):
+    """
+    Creates the existing paylines
+    """
+
+    paylines = []
+
+    for row in slot_machine:
+        paylines.append(row)
+
+    paylines.append([slot_machine[0][0], slot_machine[1][1], slot_machine[2][2], slot_machine[1][3], slot_machine[0][4]])
+    paylines.append([slot_machine[2][0], slot_machine[1][1], slot_machine[0][2], slot_machine[1][3], slot_machine[2][4]])
+
+    return paylines
+
+    
+# Slot Machine Simulation
+print("SLOT MACHINE SIMULATOR")
+
+# Prompt user to play or recieve further game information until they give a valid response
+while True:
+    # Loops starting information until user initiates game
+    while True:
+        # Prints menu
+        menu()
+
+        # Forces the user to choose an option from the menu
+        option = force_int(1, 3)
+            
+        if option == 1:
+            pay_table()
+
+        elif option == 2:
+            pay_lines()
+
+        else:
+            break
 
 # Counter to control if the loop repeats
 repeat = True
-
-# Create constants called rows and columns
-ROWS = 3
-COLUMNS = 5
-
-# Create constant which represents the cost of each line
-PAYLINE_COST = 20
 
 # Keeps track of credits
 credits = 1000
 
 while repeat == True:
     print(f"Credits: {credits}")
+    
     # Asks user for amount of paylines they will bet on until they enter a valid response
-    while True:
-        try:
-            paylines_num = int(input("""
-Enter amount of paylines you will bet on (1-5)
-> """))
+    paylines_num = force_int(1, 5)
 
-        except ValueError:
-            print("Please enter a valid number")
-            continue
+    # Create the slot machine
+    slot_machine = create_slot_machine(ROWS, COLUMNS)
 
-        # Checks if the user has enough credits
-        if paylines_num * PAYLINE_COST > credits:
-            print(f"""
-Sorry, your bet exceeds your credits balance of {credits}
-You may bet on up to {(credits - (credits % 20))/20} lines
-Please enter a valid number""")
+    # Display the slot machine
+    display_slot_machine(slot_machine)
 
-        elif paylines_num > 0 and paylines_num < 6:
-            credits -= paylines_num*PAYLINE_COST
-            break
-
-        else:
-            print("Please enter a valid number")
-
-    print("spinning...")
-    print("")
-
-    # Create slot machine in the form of a list
-    slot_machine = []
-
-    # Create 3 rows and 5 columns with one random symbol on each row
-    # Print out each row
-    for a in range(ROWS):
-        slot_machine.append([])
-        for b in range(COLUMNS):
-            slot_machine[a].append(random.choice(symbols))
-        print("\t".join(slot_machine[a]))
-        print('')
-
-    # Creates 2d payline list
-    paylines = []
-
-    # Adds paylines 1-3 by looping through slot_machine
-    for row in slot_machine:
-        paylines.append(row)
+    # Creates the list of paylines
+    paylines = create_paylines(slot_machine)
         
-    # Manually creates paylines 4-5
-    paylines.append([slot_machine[0][0], slot_machine[1][1], slot_machine[2][2], slot_machine[1][3], slot_machine[0][4]])
-    paylines.append([slot_machine[2][0], slot_machine[1][1], slot_machine[0][2], slot_machine[1][3], slot_machine[2][4]])
-
-    # A list to keep track of the winning paylines
+   # A list to keep track of the winning paylines
     winning = []
     
     # Checks winning conditions
