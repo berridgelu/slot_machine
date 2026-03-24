@@ -8,6 +8,9 @@ import random
 PAYLINE_COST = 20
 ROWS = 3
 COLUMNS = 5
+PAYLINES = 5
+SYMBOLS_IN_PAYLINES = 5
+CONSEC_IN_WINNING_PAYLINE = 3
 SYMBOLS = ["❤", "❤", "⭐", "⭐", "🍒", "🍒", "🍎", "🍎", "$", "↑"]
 
 def force_int(min_int, max_int):
@@ -105,7 +108,7 @@ def display_slot_machine(slot_machine):
 
 def create_paylines(slot_machine):
     """
-    Creates the existing paylines
+    Creates the existing paylines after a spin
     """
 
     paylines = []
@@ -118,12 +121,73 @@ def create_paylines(slot_machine):
 
     return paylines
 
-    
-# Slot Machine Simulation
-print("SLOT MACHINE SIMULATOR")
+def user_paylines(paylines, amount_paylines):
+    """
+    Retrieves the user's chosen paylines from the list of winning paylines
+    """
 
-# Prompt user to play or recieve further game information until they give a valid response
-while True:
+    user_paylines = paylines[: amount_paylines]
+
+    return user_paylines
+
+def determine_multiplier(first_symbol):
+    """
+    Checks to see what the multiplier is 
+    """
+
+    if first_symbol == "↑" or first_symbol == "$":
+        multiplier = 3
+    else:
+        multiplier = 1
+
+    return multiplier
+
+def consec_counter(first_symbol, evaluated_symbol):
+    """
+    Counts consecutive symbols in a payline
+    """
+
+    consec = 1
+
+    while True:
+        if first_symbol == evaluated_symbol or evaluated_symbol == "↑":
+            consec += 1
+        else:
+            break
+
+    return consec
+
+def add_payline_credits(consec, multiplier):
+    """
+    Adds the amount of credits a payline wins to a list
+    """
+
+    paylines_credits = []
+
+    if consec >= CONSEC_IN_WINNING_PAYLINE:
+        paylines_credits.append(10**(consec-1)*multiplier)
+
+    else:
+        paylines_credits.append(0)
+
+    return paylines_credits
+
+def find_winning_paylines_num(credits_list):
+    """
+    Finds the winning paylines and credit value
+    """
+    winning_paylines_num = []
+
+    for i in range(len(credits_list)):
+        if credits_list[i] == max(credits_list):
+            winning_paylines_num.append(i+1)
+            
+    return winning_paylines_num
+
+# Main program
+if __name__ == "__main__":
+    print("SLOT MACHINE SIMULATOR")
+
     # Loops starting information until user initiates game
     while True:
         # Prints menu
@@ -141,88 +205,70 @@ while True:
         else:
             break
 
-# Counter to control if the loop repeats
-repeat = True
+    # Keeps track of credits
+    balance = 1000
 
-# Keeps track of credits
-credits = 1000
-
-while repeat == True:
-    print(f"Credits: {credits}")
-    
-    # Asks user for amount of paylines they will bet on until they enter a valid response
-    paylines_num = force_int(1, 5)
-
-    # Create the slot machine
-    slot_machine = create_slot_machine(ROWS, COLUMNS)
-
-    # Display the slot machine
-    display_slot_machine(slot_machine)
-
-    # Creates the list of paylines
-    paylines = create_paylines(slot_machine)
+    while True:
+        print(f"Credits: {credits}")
         
-   # A list to keep track of the winning paylines
-    winning = []
-    
-    # Checks winning conditions
-    for i in range(COLUMNS):
-        # Creates multiplier for symbol specific bonuses
-        multiplier = 1
+        # Asks user for amount of paylines they will bet on until they enter a valid response
+        amount_paylines = force_int(1, 5)
 
-        # Consec  is a counter that checks for consecutive symbols in a payline
-        consec = 0
+        # Create the slot machine
+        slot_machine = create_slot_machine(ROWS, COLUMNS)
 
-        for j in range(COLUMNS):
-            # Multiplier increases for rarer symbols
-            if paylines[i][0] == "↑" or paylines[i][0] == "$":
-                multiplier = 3
-            if paylines[i][j] == paylines[i][0] or paylines[i][j] == "↑":
-                consec += 1
-            else:
-                break
+        # Display the slot machine
+        display_slot_machine(slot_machine)
+
+        # Creates the list of paylines
+        paylines = create_paylines(slot_machine)
             
-        if consec >= 3:
-            winning.append(10**(consec-1)*multiplier)
+       # A list to keep track of the winning paylines
+        user_paylines = user_paylines(paylines, amount_paylines)
+        
+        # Checks winning conditions
+        for i in range(PAYLINES):
+            for j in range(SYMBOLS_IN_PAYLINES):
+                
+                # Determines multiplier for payline
+                multiplier = determine_multiplier(paylines[i][0])
+                
+                # Determines amount of consecutive symbols in payline
+                consec = consec_counter(paylines[i][0], paylines[i][j])
+                
+            payline_credits = add_payline_credits(consec, multiplier)
+
+        user_payline_credits = payline_credits[:paylines_num]
+            
+        # Tells the user how much they have won
+        if max(user_payline_credits) == 0:
+            print("""You won nothing""")
+        else:
+            winning_paylines = find_winning_paylines_num(user_payline_credits)
+            print(f"You have won {max(user_payline_credits)} credits for line(s): {', '.join(winning_paylines)}")
+            balance += max(user_payline_credits)
+
+        if max(user_payline_credits) < max():
+            possible_winning_paylines = find_winning_paylines_num(payline_credits)
+            print(f"You could have won {max(payline_credits)} credits for line(s): {', '.join(possible_winning_paylines)}")
 
         else:
-            winning.append(0)
+            print("This was the best possible outcome")
 
-    # Tells the user how much they have won
-    if max(winning[:paylines_num]) == 0:
-        print("You have won nothing")
-
-    else:
-        # Find out how on which lines the win occurs
-        winning_lines = []
-        for i in range(paylines_num):
-            if winning[:paylines_num][i] == max(winning[:paylines_num]):
-                winning_lines.append(i+1)       
-        print(f"You have won {max(winning[:paylines_num])} credits for line(s): {', '.join(winning_lines)}")
-            
-    
-    # Ask user if they want to play again until they enter a valid response
-    while True:
-        # Asks user if they want to spin again
         if credits < 20:
             print("Game over. You no longer have enough credits to spin")
-            repeat = False
             break
 
         else:
-            choice = int(input("""
-Press 1 to spin again
-Press 2 to finish
-> """))
-        
-            # Checks users choice            
-            if choice == 1:
-                break
-            
-            elif choice == 2:
-                repeat = False
-                break
+            print("""
+    Press 1 to spin again
+    Press 2 to finish
+    > """)
+            choice = force_int(1, 2)
                 
-            else:
-                print("Please enter a valid response")
+        if choice == 2:
+            repeat = False
+            break
+
         
+
