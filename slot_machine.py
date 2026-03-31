@@ -3,8 +3,10 @@
 # Slot machine simulator
 
 import random
+import gambling
 
 # Constant variables are set
+MENU = ["Pay table", "Paylines", "Spin"]
 PAYLINE_COST = 20
 ROWS = 3
 COLUMNS = 5
@@ -14,40 +16,37 @@ CONSEC_IN_WINNING_PAYLINE = 3
 ORIGINAL_BALANCE = 1000
 SYMBOLS = ["❤", "❤", "⭐", "⭐", "🍒", "🍒", "🍎", "🍎", "$", "↑"]
 
-def force_int(min_int, max_int):
+def displays_choices(choices):
     """
-    Forces the user to enter an integer
+    Forces the user to choose a choice from a list
     """
+    
+    print("Choose an option:")
 
-    # Forces user to enter a number
+    # Prints numbered options
+    for i in range(list_size):
+        print(f"{i+1}: choices[i]")
+
+def force_int(max_value):
+    """
+    Forces user to enter an integer within a certain range
+    """
+    
     while True:
         try:
-            choice = float(input("> ")) # Forces user to enter float or integer
+            choice = float(input("> ")) # Retrieves input
         except ValueError:
-            print("Please enter a valid number") # Loops if use enters a string
+            print("Please enter a valid option") # Displays error message if the input is invalid
             continue
 
-        # Checks if the users number is within the range and that it is a whole number
-        if choice < min_int or choice > max_int or choice % 1 != 0:
-            print(f"Please enter a whole number between {min_int} - {max_int}") # Continues loop
+        # Checks if the users number is within the range and a whole number
+        if choice < 1 or choice > max_value or choice % 1 != 0:
+            print(f"Please enter a valid option") # Dsiplays error message
         else:
-            break # Breaks loop
-
-    choice = int(choice) # Makes float into an integer
+            choice = int(choice) # Makes float into an integer
+            break
 
     return choice
-
-def menu():
-    """
-    Prints options given at the start of the program
-    """
-
-    # Prints menu
-    print("""
-Press 1 for the pay table
-Press 2 for paylines
-Press 3 to spin
-""")
 
 def pay_table():
     """
@@ -203,25 +202,25 @@ if __name__ == "__main__":
 
     # Prompts user to ask for instructions or initiate game
     while True:
-        menu()
-        option = force_int(1, 3)
+        display_options(MENU) # Displays menu
+        option = force_int(len(MENU)) # Forces user to enter valid option
         
         if option == 1:
-            pay_table()
+            pay_table() # Prints pay table
         elif option == 2:
-            pay_lines()
+            pay_lines() # Prints paylines
         elif option == 3:
-            break
+            break # Spin
 
-    # Keeps track of credits
+    # Sets balance to initial balance
     balance = ORIGINAL_BALANCE
     print(f"Balance: {balance}")
 
     while True:        
-        # Asks user for amount of paylines they will bet on until they enter a valid response
+        #
         print("""
 Chosen number of paylines:""")
-        amount_paylines = force_int(1, 5) # Forces the user to enter amount of paylines
+        amount_paylines = force_int(PAYLINES) # Forces the user to enter amount of paylines
 
         cost = 20*amount_paylines # Calculates cost
         print(f"Cost: {cost}")
@@ -252,16 +251,66 @@ Chosen number of paylines:""")
         # Tells the user how much they have won
         if max(user_payline_credits) == 0:
             print("""You won nothing""")
+            win = False
         else:
             winning_paylines = winning_paylines(user_payline_credits)
             print(f"You have won {max(user_payline_credits)} credits for line(s): {', '.join(winning_paylines)}")
             balance += max(user_payline_credits)
+            win = True
 
         # Tells user what they could have won
         if max(user_payline_credits) < max(payline_credits):
             possible_winning_paylines = winning_paylines(payline_credits)
             print(f"You could have won {max(payline_credits)} credits for line(s): {', '.join(possible_winning_paylines)}")
 
+        # Checks if the user would like to gamble their winnings
+        if win == True:
+            print("""
+1. Gamble your winnings
+2. Keep current winnings""")
+
+            option = force_int(1, 2)
+
+        # Code for gambling
+        if option == 1:
+            print("""
+1. Rules
+2. Gamble""")
+            while True:
+                option = force_int(1, 2)
+
+                # Displays rules or continues to gambling
+                if option == 1:
+                    gambling.gamble_rules()
+                elif option == 2:
+                    break
+
+            # User chooses between color and suit
+            print("""
+1. Color
+2. Suit""")
+            option = force_int(1, 2)
+
+            # User chooses between colors
+            if option == 1:
+                print("""
+1. Red
+2. Black""")
+                option = force_int(1, 2)
+            # User choose between suits
+            if option == 2:
+                print("""
+1. Hearts
+2. Diamonds
+3. Clubs
+4. Spades""")
+                option = force_int(1, 4)
+
+                
+
+            card() # Draw the card
+            print_card # Print the card
+ 
         print(f"Balance: {balance}") # Print balance
 
         # Checks if the user will play again
