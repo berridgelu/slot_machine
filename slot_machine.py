@@ -24,8 +24,8 @@ def displays_choices(choices):
     print("Choose an option:")
 
     # Prints numbered options
-    for i in range(list_size):
-        print(f"{i+1}: choices[i]")
+    for i in range(len(choices)):
+        print(f"{i+1}: {choices[i]}")
 
 def force_int(max_value):
     """
@@ -202,7 +202,7 @@ if __name__ == "__main__":
 
     # Prompts user to ask for instructions or initiate game
     while True:
-        display_options(MENU) # Displays menu
+        displays_choices(MENU) # Displays menu
         option = force_int(len(MENU)) # Forces user to enter valid option
         
         if option == 1:
@@ -255,7 +255,7 @@ Chosen number of paylines:""")
         else:
             winning_paylines = winning_paylines(user_payline_credits)
             print(f"You have won {max(user_payline_credits)} credits for line(s): {', '.join(winning_paylines)}")
-            balance += max(user_payline_credits)
+            winnings = max(user_payline_credits)
             win = True
 
         # Tells user what they could have won
@@ -269,7 +269,7 @@ Chosen number of paylines:""")
 1. Gamble your winnings
 2. Keep current winnings""")
 
-            option = force_int(1, 2)
+            option = force_int(2)
 
         # Code for gambling
         if option == 1:
@@ -277,40 +277,52 @@ Chosen number of paylines:""")
 1. Rules
 2. Gamble""")
             while True:
-                option = force_int(1, 2)
+                option = force_int(2)
 
                 # Displays rules or continues to gambling
                 if option == 1:
                     gambling.gamble_rules()
                 elif option == 2:
+                    balance += winnings
                     break
 
             # User chooses between color and suit
             print("""
 1. Color
 2. Suit""")
-            option = force_int(1, 2)
+            option = force_int(2)
 
-            # User chooses between colors
+            # User chooses between color if they chose color
             if option == 1:
                 print("""
 1. Red
 2. Black""")
-                option = force_int(1, 2)
-            # User choose between suits
-            if option == 2:
+                option = force_int(2) - 1
+
+                card = gambling.card() # Draw the card
+                gambling.print_card(card) # Print the card
+
+                winnings, win = gambling.check_color(card, gambling.COLORS[option], winnings) # Checks the users winnings
+
+                
+                
+
+            # User choose between suits if they chose suit
+            elif option == 2:
                 print("""
 1. Hearts
 2. Diamonds
 3. Clubs
 4. Spades""")
-                option = force_int(1, 4)
+                option = force_int(4)
 
-                
+                card = gambling.card() # Draw the card
+                gambling.print_card(card) # Print the card
 
-            card() # Draw the card
-            print_card # Print the card
- 
+                winnings, win = gambling.check_suit(card, gambling.COLORS[option], winnings) # Checks the users winnings
+
+        gambling.display_win(win, winnings)
+                 
         print(f"Balance: {balance}") # Print balance
 
         # Checks if the user will play again
@@ -322,7 +334,7 @@ Chosen number of paylines:""")
             print("""
 Press 1 to spin again
 Press 2 to finish""")
-            choice = force_int(1, 2)
+            choice = force_int(2)
         if choice == 2:
             repeat = False
             break
